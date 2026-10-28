@@ -49,6 +49,13 @@ import {
   syncReceiptsWithContacts,
 } from './utils/contactStorage';
 import {
+  subscribeToCloudContacts,
+  saveContactToCloud,
+  saveBatchContactsToCloud,
+  deleteContactFromCloud,
+  deleteMultipleContactsFromCloud,
+} from './utils/contactSync';
+import {
   ThemeSettings,
   getStoredThemeSettings,
   saveThemeSettings,
@@ -82,8 +89,25 @@ export default function App() {
   const [isImportContactsModalOpen, setIsImportContactsModalOpen] = useState(false);
   const [isProcessingPdf, setIsProcessingPdf] = useState(false);
   const [processingPdfName, setProcessingPdfName] = useState<string | null>(null);
+  const [cloudSyncStatus, setCloudSyncStatus] = useState<{
+    status: 'connecting' | 'synced' | 'error';
+    details?: string;
+  }>({ status: 'connecting', details: 'A sincronizar contactos na nuvem...' });
   const [notification, setNotification] = useState<{ id: string; message: string; sub?: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Real-time synchronization of contacts across all hosted systems
+  useEffect(() => {
+    const unsubscribe = subscribeToCloudContacts(
+      (cloudContacts) => {
+        setContacts(cloudContacts);
+      },
+      (status, details) => {
+        setCloudSyncStatus({ status, details });
+      }
+    );
+    return () => unsubscribe();
+  }, []);
 
   // Apply theme to document and persist to storage
   useEffect(() => {
@@ -427,6 +451,7 @@ export default function App() {
 
   // Contact Management Handlers
   const handleSaveContact = (newOrUpdated: CollaboratorContact) => {
+    // 1. Update local state
     setContacts((prev) => {
       const idx = prev.findIndex((c) => c.id === newOrUpdated.id);
       let next: CollaboratorContact[];
@@ -440,7 +465,12 @@ export default function App() {
       return next;
     });
 
-    // Also update matching receipt
+    // 2. Persist to Firestore cloud database (broadcasts to all hosted systems)
+    saveContactToCloud(newOrUpdated).catch((err) => {
+      console.warn('Erro ao sincronizar contacto na nuvem:', err);
+    });
+
+    // 3. Also update matching receipt
     setReceipts((prev) =>
       prev.map((r) => {
         const matchesMecan =
@@ -463,23 +493,29 @@ export default function App() {
 
     setNotification({
       id: String(Date.now()),
-      message: 'Contacto gravado com sucesso.',
-      sub: `${newOrUpdated.name} foi gravado na agenda e vinculado aos recibos.`,
+      message: 'Contacto gravado e sincronizado.',
+      sub: `${newOrUpdated.name} foi sincronizado na nuvem para todos os sistemas hospedados.`,
     });
   };
 
   const handleDeleteContact = (id: string) => {
     setContacts((prev) => prev.filter((c) => c.id !== id));
+    deleteContactFromCloud(id).catch((err) => {
+      console.warn('Erro ao remover contacto da nuvem:', err);
+    });
     setNotification({
       id: String(Date.now()),
       message: 'Contacto removido.',
-      sub: 'O contacto foi eliminado da agenda.',
+      sub: 'O contacto foi eliminado da agenda em todos os sistemas.',
     });
   };
 
   const handleDeleteMultipleContacts = (ids: string[]) => {
     const idSet = new Set(ids);
     setContacts((prev) => prev.filter((c) => !idSet.has(c.id)));
+    deleteMultipleContactsFromCloud(ids).catch((err) => {
+      console.warn('Erro ao remover múltiplos contactos da nuvem:', err);
+    });
     setNotification({
       id: String(Date.now()),
       message: `${ids.length} contactos eliminados com sucesso.`,
@@ -487,6 +523,8 @@ export default function App() {
   };
 
   const handleImportContacts = (imported: CollaboratorContact[], overwrite: boolean) => {
+    let finalMergedList: CollaboratorContact[] = [];
+
     setContacts((prev) => {
       let merged = [...prev];
       imported.forEach((newItem) => {
@@ -520,8 +558,14 @@ export default function App() {
           merged.push(newItem);
         }
       });
+      finalMergedList = merged;
       saveContactsToStorage(merged);
       return merged;
+    });
+
+    // Persist all imported contacts to Firestore cloud database
+    saveBatchContactsToCloud(finalMergedList.length > 0 ? finalMergedList : imported).catch((err) => {
+      console.warn('Erro ao salvar lote de contactos na nuvem:', err);
     });
 
     const { updatedReceipts, matchCount } = syncReceiptsWithContacts(receipts, imported);
@@ -532,7 +576,9 @@ export default function App() {
     setNotification({
       id: String(Date.now()),
       message: `${imported.length} contactos importados com sucesso!`,
-      sub: matchCount > 0 ? `${matchCount} recibos foram vinculados automaticamente.` : 'Lista de contactos atualizada.',
+      sub: matchCount > 0
+        ? `${matchCount} recibos vinculados. Contactos sincronizados em todos os sistemas.`
+        : 'Contactos sincronizados na nuvem para todos os sistemas hospedados.',
     });
   };
 
@@ -823,10 +869,22 @@ export default function App() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
             <span className="font-mono text-slate-700 dark:text-slate-300">{receipts.length} recibos na lista</span>
             <span>·</span>
-            <span className="font-mono text-slate-700 dark:text-slate-300">{contacts.length} contactos</span>
+            <span className="inline-flex items-center gap-1.5 font-mono text-slate-700 dark:text-slate-300">
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  cloudSyncStatus.status === 'synced'
+                    ? 'bg-emerald-500'
+                    : cloudSyncStatus.status === 'connecting'
+                    ? 'bg-amber-500 animate-pulse'
+                    : 'bg-rose-500'
+                }`}
+                title={cloudSyncStatus.details || 'Sincronização em nuvem ativa'}
+              />
+              <span>{contacts.length} contactos (nuvem)</span>
+            </span>
             <span>·</span>
             <span className="font-mono text-slate-700 dark:text-slate-300">{history.length} lotes no histórico</span>
           </div>
@@ -888,6 +946,7 @@ export default function App() {
             onDeleteMultiple={handleDeleteMultipleContacts}
             onSyncWithReceipts={handleSyncWithReceipts}
             onOpenSendModalForReceipt={(r) => handleOpenSendModal(r)}
+            cloudSyncStatus={cloudSyncStatus}
           />
         ) : (
           /* History View */

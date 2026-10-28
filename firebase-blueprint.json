@@ -1,0 +1,70 @@
+{
+  "entities": {
+    "CollaboratorContact": {
+      "title": "CollaboratorContact",
+      "description": "Collaborator contact information for payroll receipt distribution across all hosted instances",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the contact"
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name of the employee"
+        },
+        "mechanicalNumber": {
+          "type": "string",
+          "description": "Mechanical number or employee code"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Primary phone number formatted with country code"
+        },
+        "secondaryPhones": {
+          "type": "array",
+          "description": "Additional alternate phone numbers"
+        },
+        "allPhones": {
+          "type": "array",
+          "description": "Detailed list of phones with WhatsApp flags"
+        },
+        "email": {
+          "type": "string",
+          "description": "Corporate or personal email address"
+        },
+        "secondaryEmails": {
+          "type": "array",
+          "description": "Additional alternate email addresses"
+        },
+        "department": {
+          "type": "string",
+          "description": "Department or division name"
+        },
+        "category": {
+          "type": "string",
+          "description": "Job title or category"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Administrative notes"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp in ISO format"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last update timestamp in ISO format"
+        }
+      },
+      "required": ["id", "name", "phone", "email"]
+    }
+  },
+  "firestore": {
+    "/contacts/{contactId}": {
+      "schema": "CollaboratorContact",
+      "description": "Synchronized collaborator contact registry shared across all hosted environments"
+    }
+  }
+}

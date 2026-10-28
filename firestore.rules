@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-\\.:]+$');
+    }
+
+    function isValidContact(data) {
+      return data.keys().hasAll(['id', 'name', 'phone', 'email'])
+        && data.id is string && data.id.size() > 0 && data.id.size() <= 128
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 200
+        && data.phone is string && data.phone.size() <= 50
+        && data.email is string && data.email.size() <= 150
+        && (!('mechanicalNumber' in data) || (data.mechanicalNumber is string && data.mechanicalNumber.size() <= 50))
+        && (!('department' in data) || (data.department is string && data.department.size() <= 100))
+        && (!('category' in data) || (data.category is string && data.category.size() <= 100))
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000))
+        && (!('secondaryPhones' in data) || (data.secondaryPhones is list && data.secondaryPhones.size() <= 20))
+        && (!('secondaryEmails' in data) || (data.secondaryEmails is list && data.secondaryEmails.size() <= 20))
+        && (!('allPhones' in data) || (data.allPhones is list && data.allPhones.size() <= 20))
+        && (!('createdAt' in data) || data.createdAt is string)
+        && (!('updatedAt' in data) || data.updatedAt is string);
+    }
+
+    match /contacts/{contactId} {
+      allow read: if true;
+      allow create, update: if isValidId(contactId) && isValidContact(request.resource.data);
+      allow delete: if isValidId(contactId);
+    }
+
+    match /test/connection {
+      allow read: if true;
+    }
+  }
+}

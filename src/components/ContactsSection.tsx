@@ -27,6 +27,7 @@ import {
   ChevronUp,
   Smartphone,
   CheckCheck,
+  Cloud,
 } from 'lucide-react';
 import { CollaboratorContact } from '../types/contact';
 import { ReceiptData } from '../types/receipt';
@@ -49,6 +50,10 @@ interface ContactsSectionProps {
   onDeleteMultiple: (ids: string[]) => void;
   onSyncWithReceipts: () => void;
   onOpenSendModalForReceipt?: (receipt: ReceiptData) => void;
+  cloudSyncStatus?: {
+    status: 'connecting' | 'synced' | 'error';
+    details?: string;
+  };
 }
 
 export const ContactsSection: React.FC<ContactsSectionProps> = ({
@@ -62,6 +67,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
   onDeleteMultiple,
   onSyncWithReceipts,
   onOpenSendModalForReceipt,
+  cloudSyncStatus = { status: 'synced', details: 'Sincronizado na Nuvem' },
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'has_phone' | 'has_email' | 'linked'>('all');
@@ -272,12 +278,40 @@ if (list) {
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden transition-colors">
         <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-app-primary dark:text-white font-bold text-lg">
+            <div className="flex flex-wrap items-center gap-2 text-app-primary dark:text-white font-bold text-lg">
               <Users className="w-5 h-5 text-app-primary" />
               <h2>Lista e Agenda de Contactos dos Colaboradores</h2>
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${
+                  cloudSyncStatus.status === 'synced'
+                    ? 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
+                    : cloudSyncStatus.status === 'connecting'
+                    ? 'bg-amber-50 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800'
+                    : 'bg-rose-50 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-800'
+                }`}
+                title="Sincronização em tempo real entre todos os sistemas hospedados via Firestore"
+              >
+                <Cloud className="w-3 h-3 shrink-0" />
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    cloudSyncStatus.status === 'synced'
+                      ? 'bg-emerald-500'
+                      : cloudSyncStatus.status === 'connecting'
+                      ? 'bg-amber-500 animate-pulse'
+                      : 'bg-rose-500'
+                  }`}
+                />
+                <span>
+                  {cloudSyncStatus.status === 'synced'
+                    ? 'Sincronizado na Nuvem'
+                    : cloudSyncStatus.status === 'connecting'
+                    ? 'A ligar à Nuvem...'
+                    : 'Modo Offline / Local'}
+                </span>
+              </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Adicione contactos gravando manualmente ou importe através de ficheiro (incluindo Google Contacts CSV e WhatsApp Web).
+              Todos os contactos são sincronizados em tempo real entre todos os sistemas hospedados. Pode adicionar manualmente ou importar (Google Contacts CSV e WhatsApp Web).
             </p>
           </div>
 
