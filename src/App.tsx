@@ -19,6 +19,7 @@ import { ReceiptData, BatchHistoryRecord } from './types/receipt';
 import { CollaboratorContact } from './types/contact';
 import { ReceiptList } from './components/ReceiptList';
 import { ReceiptModal } from './components/ReceiptModal';
+import { ReceiptDropzone } from './components/ReceiptDropzone';
 import { NamingPatternSelector } from './components/NamingPatternSelector';
 import { StatsBar } from './components/StatsBar';
 import { AddBatchModal } from './components/AddBatchModal';
@@ -79,6 +80,8 @@ export default function App() {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<CollaboratorContact | null>(null);
   const [isImportContactsModalOpen, setIsImportContactsModalOpen] = useState(false);
+  const [isProcessingPdf, setIsProcessingPdf] = useState(false);
+  const [processingPdfName, setProcessingPdfName] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ id: string; message: string; sub?: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -173,6 +176,9 @@ export default function App() {
       });
       return;
     }
+
+    setIsProcessingPdf(true);
+    setProcessingPdfName(file.name);
 
     try {
       const buffer = await file.arrayBuffer();
@@ -317,6 +323,9 @@ export default function App() {
         message: 'Erro ao processar ficheiro PDF',
         sub: err.message || 'Falha no processamento',
       });
+    } finally {
+      setIsProcessingPdf(false);
+      setProcessingPdfName(null);
     }
   };
 
@@ -828,6 +837,15 @@ export default function App() {
 
         {activeTab === 'receipts' ? (
           <>
+            {/* Dedicated Field to Add or Drag Receipts */}
+            <ReceiptDropzone
+              onFileSelect={(file) => processAndAddPdfDirectly(file)}
+              isProcessing={isProcessingPdf}
+              processingFileName={processingPdfName}
+              onOpenAdvancedModal={() => setIsAddBatchOpen(true)}
+              totalReceiptsCount={receipts.length}
+            />
+
             {/* Naming Configuration */}
             <NamingPatternSelector
               pattern={namingPattern}

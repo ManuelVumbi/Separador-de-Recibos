@@ -329,8 +329,20 @@ export const ReceiptList: React.FC<ReceiptListProps> = ({
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-12 text-center text-slate-400 dark:text-slate-500 space-y-3">
-                  <p>Nenhum recibo na lista para exibição.</p>
+                <td colSpan={7} className="py-12 text-center text-slate-400 dark:text-slate-500 space-y-2">
+                  <div className="w-10 h-10 mx-auto rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <p className="font-semibold text-slate-700 dark:text-slate-300">
+                    {receipts.length === 0
+                      ? 'Nenhum recibo carregado no momento'
+                      : 'Nenhum recibo corresponde aos filtros aplicados'}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                    {receipts.length === 0
+                      ? 'Arraste o ficheiro PDF de várias páginas para o campo de upload acima ou clique em "Selecionar Ficheiro PDF".'
+                      : 'Tente alterar a pesquisa ou selecionar outro filtro de período e categoria.'}
+                  </p>
                 </td>
               </tr>
             ) : (
