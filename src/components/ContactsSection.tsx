@@ -28,6 +28,7 @@ import {
   Smartphone,
   CheckCheck,
   Cloud,
+  RefreshCw,
 } from 'lucide-react';
 import { CollaboratorContact } from '../types/contact';
 import { ReceiptData } from '../types/receipt';
@@ -38,6 +39,7 @@ import {
   exportContactsToExcel,
   parseWhatsAppRawText,
 } from '../utils/contactParser';
+import { forceBidirectionalSync, exportContactsToJson } from '../utils/contactSync';
 
 interface ContactsSectionProps {
   contacts: CollaboratorContact[];
@@ -83,6 +85,8 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
   const [waError, setWaError] = useState<string | null>(null);
   const [waSuccess, setWaSuccess] = useState<string | null>(null);
   const [copiedScript, setCopiedScript] = useState(false);
+  const [isForceSyncing, setIsForceSyncing] = useState(false);
+  const [syncNotice, setSyncNotice] = useState<string | null>(null);
 
   // Map of mechanical numbers and names to receipts for quick match check
   const receiptMecanSet = useMemo(() => {
@@ -266,6 +270,30 @@ if (list) {
     setTimeout(() => setCopiedScript(false), 2500);
   };
 
+  const handleForceSync = async () => {
+    try {
+      setIsForceSyncing(true);
+      setSyncNotice('A verificar contactos e a sincronizar com a base de dados Firestore na nuvem...');
+      const res = await forceBidirectionalSync();
+      if (res.uploadedCount > 0) {
+        setSyncNotice(
+          `Sincronização concluída com sucesso! ${res.uploadedCount} novos contactos foram enviados para a nuvem. Todos os ${res.totalCount} contactos estão disponíveis em todas as plataformas hospedadas.`
+        );
+      } else {
+        setSyncNotice(
+          `Todos os ${res.totalCount} contactos já se encontram 100% atualizados e sincronizados em todas as plataformas.`
+        );
+      }
+      setTimeout(() => setSyncNotice(null), 7000);
+    } catch (err: any) {
+      console.error('Erro na sincronização forçada:', err);
+      setSyncNotice(`Erro ao sincronizar com Firestore: ${err?.message || 'Falha de rede'}`);
+      setTimeout(() => setSyncNotice(null), 6000);
+    } finally {
+      setIsForceSyncing(false);
+    }
+  };
+
   // Stats
   const totalCount = contacts.length;
   const withPhoneCount = contacts.filter((c) => c.phone).length;
@@ -390,8 +418,43 @@ if (list) {
               <Smartphone className="w-3.5 h-3.5 text-emerald-700" />
               <span>Exportar vCard</span>
             </button>
+
+            <button
+              onClick={() => exportContactsToJson(contacts)}
+              className="px-3 py-2 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
+              title="Descarregar cópia de segurança completa de todos os contactos em formato JSON"
+            >
+              <Download className="w-3.5 h-3.5 text-slate-600" />
+              <span>Backup JSON</span>
+            </button>
+
+            <button
+              onClick={handleForceSync}
+              disabled={isForceSyncing}
+              className="px-3.5 py-2 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-colors flex items-center gap-1.5 shadow-2xs cursor-pointer disabled:opacity-60"
+              title="Garantir que todos os 467 contactos e dados locais estão sincronizados no Firestore para todas as plataformas"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isForceSyncing ? 'animate-spin' : ''}`} />
+              <span>{isForceSyncing ? 'A Sincronizar...' : 'Sincronizar Nuvem (Todos)'}</span>
+            </button>
           </div>
         </div>
+
+        {/* Sync Notification Banner */}
+        {syncNotice && (
+          <div className="p-3 bg-sky-50 dark:bg-sky-950/80 border-b border-sky-200 dark:border-sky-800 text-xs text-sky-900 dark:text-sky-200 flex items-center justify-between gap-2 transition-all">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" />
+              <span>{syncNotice}</span>
+            </div>
+            <button
+              onClick={() => setSyncNotice(null)}
+              className="text-xs text-sky-700 hover:underline cursor-pointer"
+            >
+              Fechar
+            </button>
+          </div>
+        )}
 
         {/* 4 Stats Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 bg-slate-50/50">
