@@ -1,0 +1,6 @@
+{
+  "name": "Separador de Recibos de Vencimento",
+  "description": "Separação inteligente e renomeação automática de recibos de vencimento em PDF com base no nome de cada colaborador.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

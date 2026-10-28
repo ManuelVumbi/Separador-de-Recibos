@@ -1,0 +1,310 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+/* ==========================================================================
+   CSS Variables for Environment Themes & Color Customization
+   ========================================================================== */
+
+:root {
+  /* Default Base Light Colors */
+  --app-bg: #f8fafc;
+  --app-header-bg: rgba(255, 255, 255, 0.95);
+  --app-card-bg: #ffffff;
+  --app-card-border: #e2e8f0;
+  --app-subtle-border: #f1f5f9;
+  --app-text-title: #0f172a;
+  --app-text-body: #334155;
+  --app-text-muted: #64748b;
+  --app-input-bg: #f8fafc;
+  --app-table-header: #f8fafc;
+  --app-table-hover: #f1f5f9;
+
+  /* Default Primary: Blue */
+  --app-primary: #1e3a8a;
+  --app-primary-hover: #172554;
+  --app-primary-fg: #ffffff;
+  --app-primary-light: #eff6ff;
+  --app-primary-border: #bfdbfe;
+  --app-primary-text: #1d4ed8;
+  --app-primary-ring: rgba(30, 58, 138, 0.25);
+  --app-brand-badge: #1e3a8a;
+}
+
+/* Base Dark Mode */
+.dark {
+  --app-bg: #090d16;
+  --app-header-bg: rgba(15, 23, 42, 0.95);
+  --app-card-bg: #0f172a;
+  --app-card-border: #1e293b;
+  --app-subtle-border: #1e293b;
+  --app-text-title: #f8fafc;
+  --app-text-body: #cbd5e1;
+  --app-text-muted: #94a3b8;
+  --app-input-bg: #0b1120;
+  --app-table-header: #0b1120;
+  --app-table-hover: #1e293b;
+
+  --app-primary: #3b82f6;
+  --app-primary-hover: #2563eb;
+  --app-primary-fg: #ffffff;
+  --app-primary-light: rgba(59, 130, 246, 0.14);
+  --app-primary-border: #1e3a8a;
+  --app-primary-text: #60a5fa;
+  --app-primary-ring: rgba(59, 130, 246, 0.3);
+  --app-brand-badge: #1d4ed8;
+}
+
+/* ==========================================================================
+   Accent Palettes
+   ========================================================================== */
+
+/* 1. Azul Corporativo (Blue) */
+[data-accent="blue"] {
+  --app-primary: #1e40af;
+  --app-primary-hover: #1e3a8a;
+  --app-primary-fg: #ffffff;
+  --app-primary-light: #eff6ff;
+  --app-primary-border: #bfdbfe;
+  --app-primary-text: #1d4ed8;
+  --app-primary-ring: rgba(30, 64, 175, 0.25);
+  --app-brand-badge: #1e3a8a;
+}
+.dark[data-accent="blue"] {
+  --app-primary: #3b82f6;
+  --app-primary-hover: #2563eb;
+  --app-primary-fg: #ffffff;
+  --app-primary-light: rgba(59, 130, 246, 0.16);
+  --app-primary-border: #1e3a8a;
+  --app-primary-text: #60a5fa;
+  --app-primary-ring: rgba(59, 130, 246, 0.35);
+  --app-brand-badge: #1d4ed8;
+}
+
+/* 2. Verde Esmeralda (Emerald) */
+[data-accent="emerald"] {
+  --app-primary: #047857;
+  --app-primary-hover: #065f46;
+  --app-primary-fg: #ffffff;
+  --app-primary-light: #ecfdf5;
+  --app-primary-border: #a7f3d0;
+  --app-primary-text: #059669;
+  --app-primary-ring: rgba(4, 120, 87, 0.25);
+  --app-brand-badge: #065f46;
+}
+.dark[data-accent="emerald"] {
+  --app-primary: #10b981;
+  --app-primary-hover: #059669;
+  --app-primary-fg: #022c22;
+  --app-primary-light: rgba(16, 185, 129, 0.16);
+  --app-primary-border: #065f46;
+  --app-primary-text: #34d399;
+  --app-primary-ring: rgba(16, 185, 129, 0.35);
+  --app-brand-badge: #047857;
+}
+
+/* 3. Índigo Nobre (Indigo) */
+[data-accent="indigo"] {
+  --app-primary: #4338ca;
+  --app-primary-hover: #3730a3;
+  --app-primary-fg: #ffffff;
+  --app-primary-light: #eef2ff;
+  --app-primary-border: #c7d2fe;
+  --app-primary-text: #4f46e5;
+  --app-primary-ring: rgba(67, 56, 202, 0.25);
+  --app-brand-badge: #3730a3;
+}
+.dark[data-accent="indigo"] {
+  --app-primary: #6366f1;
+  --app-primary-hover: #4f46e5;
+  --app-primary-fg: #ffffff;
+  --app-primary-light: rgba(99, 102, 241, 0.16);
+  --app-primary-border: #3730a3;
+  --app-primary-text: #818cf8;
+  --app-primary-ring: rgba(99, 102, 241, 0.35);
+  --app-brand-badge: #4338ca;
+}
+
+/* 4. Petróleo & Oceano (Teal) */
+[data-accent="teal"] {
+  --app-primary: #0f766e;
+  --app-primary-hover: #115e59;
+  --app-primary-fg: #ffffff;
+  --app-primary-light: #f0fdfa;
+  --app-primary-border: #99f6e4;
+  --app-primary-text: #0d9488;
+  --app-primary-ring: rgba(15, 118, 110, 0.25);
+  --app-brand-badge: #115e59;
+}
+.dark[data-accent="teal"] {
+  --app-primary: #14b8a6;
+  --app-primary-hover: #0d9488;
+  --app-primary-fg: #042f2e;
+  --app-primary-light: rgba(20, 184, 166, 0.16);
+  --app-primary-border: #115e59;
+  --app-primary-text: #2dd4bf;
+  --app-primary-ring: rgba(20, 184, 166, 0.35);
+  --app-brand-badge: #0f766e;
+}
+
+/* 5. Grafite & Ardósia (Slate) */
+[data-accent="slate"] {
+  --app-primary: #334155;
+  --app-primary-hover: #1e293b;
+  --app-primary-fg: #ffffff;
+  --app-primary-light: #f8fafc;
+  --app-primary-border: #cbd5e1;
+  --app-primary-text: #475569;
+  --app-primary-ring: rgba(51, 65, 85, 0.25);
+  --app-brand-badge: #1e293b;
+}
+.dark[data-accent="slate"] {
+  --app-primary: #94a3b8;
+  --app-primary-hover: #64748b;
+  --app-primary-fg: #0f172a;
+  --app-primary-light: rgba(148, 163, 184, 0.16);
+  --app-primary-border: #475569;
+  --app-primary-text: #cbd5e1;
+  --app-primary-ring: rgba(148, 163, 184, 0.35);
+  --app-brand-badge: #334155;
+}
+
+/* 6. Âmbar Executivo (Amber) */
+[data-accent="amber"] {
+  --app-primary: #b45309;
+  --app-primary-hover: #92400e;
+  --app-primary-fg: #ffffff;
+  --app-primary-light: #fffbeb;
+  --app-primary-border: #fde68a;
+  --app-primary-text: #d97706;
+  --app-primary-ring: rgba(180, 83, 9, 0.25);
+  --app-brand-badge: #92400e;
+}
+.dark[data-accent="amber"] {
+  --app-primary: #f59e0b;
+  --app-primary-hover: #d97706;
+  --app-primary-fg: #451a03;
+  --app-primary-light: rgba(245, 158, 11, 0.16);
+  --app-primary-border: #92400e;
+  --app-primary-text: #fbbf24;
+  --app-primary-ring: rgba(245, 158, 11, 0.35);
+  --app-brand-badge: #b45309;
+}
+
+/* 7. Bordô & Rubro (Rose) */
+[data-accent="rose"] {
+  --app-primary: #be123c;
+  --app-primary-hover: #9f1239;
+  --app-primary-fg: #ffffff;
+  --app-primary-light: #fff1f2;
+  --app-primary-border: #fecdd3;
+  --app-primary-text: #e11d48;
+  --app-primary-ring: rgba(190, 18, 60, 0.25);
+  --app-brand-badge: #9f1239;
+}
+.dark[data-accent="rose"] {
+  --app-primary: #f43f5e;
+  --app-primary-hover: #e11d48;
+  --app-primary-fg: #ffffff;
+  --app-primary-light: rgba(244, 63, 94, 0.16);
+  --app-primary-border: #9f1239;
+  --app-primary-text: #fb7185;
+  --app-primary-ring: rgba(244, 63, 94, 0.35);
+  --app-brand-badge: #be123c;
+}
+
+/* ==========================================================================
+   Surface Variants
+   ========================================================================== */
+
+/* Warm surface */
+[data-surface="warm"] {
+  --app-bg: #faf7f2;
+  --app-header-bg: rgba(253, 252, 250, 0.95);
+  --app-card-bg: #ffffff;
+  --app-card-border: #e7e5e4;
+  --app-subtle-border: #f5f5f4;
+  --app-table-header: #f5f5f4;
+  --app-table-hover: #fafaf9;
+}
+.dark[data-surface="warm"] {
+  --app-bg: #14120e;
+  --app-header-bg: rgba(28, 25, 23, 0.95);
+  --app-card-bg: #1c1917;
+  --app-card-border: #292524;
+  --app-subtle-border: #292524;
+  --app-table-header: #171513;
+  --app-table-hover: #292524;
+}
+
+/* Pure contrast surface */
+[data-surface="pure"] {
+  --app-bg: #ffffff;
+  --app-header-bg: rgba(255, 255, 255, 0.98);
+  --app-card-bg: #f8fafc;
+  --app-card-border: #cbd5e1;
+  --app-subtle-border: #e2e8f0;
+  --app-table-header: #f1f5f9;
+  --app-table-hover: #e2e8f0;
+}
+.dark[data-surface="pure"] {
+  --app-bg: #000000;
+  --app-header-bg: rgba(10, 10, 10, 0.98);
+  --app-card-bg: #0a0a0a;
+  --app-card-border: #262626;
+  --app-subtle-border: #262626;
+  --app-table-header: #121212;
+  --app-table-hover: #1c1c1c;
+}
+
+/* ==========================================================================
+   App Theme Classes for Clean UI Binding
+   ========================================================================== */
+
+.app-canvas {
+  background-color: var(--app-bg);
+  color: var(--app-text-body);
+  transition: background-color 150ms cubic-bezier(0.16, 1, 0.3, 1),
+              color 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.app-header {
+  background-color: var(--app-header-bg);
+  border-color: var(--app-card-border);
+}
+
+.app-card {
+  background-color: var(--app-card-bg);
+  border-color: var(--app-card-border);
+  color: var(--app-text-body);
+}
+
+.app-primary-btn {
+  background-color: var(--app-primary);
+  color: var(--app-primary-fg);
+}
+.app-primary-btn:hover {
+  background-color: var(--app-primary-hover);
+}
+
+.app-primary-subtle-btn {
+  background-color: var(--app-primary-light);
+  border-color: var(--app-primary-border);
+  color: var(--app-primary-text);
+}
+.app-primary-subtle-btn:hover {
+  filter: brightness(0.95);
+}
+
+.app-brand-badge {
+  background-color: var(--app-brand-badge);
+  color: #ffffff;
+}
+
+.app-text-title {
+  color: var(--app-text-title);
+}
+
+.app-text-muted {
+  color: var(--app-text-muted);
+}
